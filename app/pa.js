@@ -9,9 +9,7 @@ export default function Page() {
   const code = process.env.EXPO_PUBLIC_PA;
   const [data, setData] = useState([]);
   const [userInfo, setUserInfo] = useState({});
-  const user =
-    "https://api.calendly.com/users/6d919925-d087-42b6-8ecf-d209ea33a5fa";
-
+  const [user, setUser] = useState("");
   useEffect(() => {
     const options = {
       method: "GET",
@@ -25,6 +23,7 @@ export default function Page() {
     axios
       .request(options)
       .then(function (response) {
+        setUser(response.data["resource"]["uri"]);
         setUserInfo(response.data["resource"]);
       })
       .catch(function (error) {
@@ -33,24 +32,26 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
-    const options = {
-      method: "GET",
-      url: "https://api.calendly.com/user_availability_schedules",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${code}`,
-      },
-      params: { user: user },
-    };
-    axios
-      .request(options)
-      .then(function (response) {
-        setData(response.data["collection"]);
-      })
-      .catch(function (error) {
-        console.error(error);
-      });
-  }, []);
+    if (user !== "") {
+      const options = {
+        method: "GET",
+        url: "https://api.calendly.com/user_availability_schedules",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${code}`,
+        },
+        params: { user: user },
+      };
+      axios
+        .request(options)
+        .then(function (response) {
+          setData(response.data["collection"]);
+        })
+        .catch(function (error) {
+          console.error(error);
+        });
+    }
+  }, [user]);
   return (
     <SafeAreaView>
       <View>
